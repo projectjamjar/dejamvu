@@ -27,6 +27,8 @@ class Dejavu(object):
         self.db = db_cls(**config.get("database", {}))
         self.db.setup()
 
+        self.multiple_match = config.get("multiple_match",False)
+
         # if we should limit seconds fingerprinted,
         # None|-1 means use entire track
         self.limit = self.config.get("fingerprint_limit", None)
@@ -122,6 +124,9 @@ class Dejavu(object):
             consensus about which hashes are "true" signal from the audio.
 
             Returns a dictionary with match information.
+
+            If "multiple_match" is set to True in the config, this will return
+            a list of dictionaries with match information.
         """
         # align by diffs
         diff_counter = {}

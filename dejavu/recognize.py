@@ -32,8 +32,12 @@ class FileRecognizer(BaseRecognizer):
         match = self._recognize(*frames)
         t = time.time() - t
 
-        if match:
-            match['match_time'] = t
+        if self.dejavu.multiple_match:
+            for track in match:
+                track['match_time'] = t/len(match)
+        else:
+            if match:
+                match['match_time'] = t
 
         return match
 
