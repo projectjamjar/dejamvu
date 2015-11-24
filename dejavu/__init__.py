@@ -132,9 +132,13 @@ class Dejavu(object):
         diff_counter = {}
 
         if self.multiple_match:
-            largest = {}
-            largest_count = {}
+            largest = {} # A dictionary of song id's to ???
+            largest_count = {} # A dictionary of song id's to ???
+
+            # Run through all of the (song id, offset)
             for tup in matches:
+                # diff = database offset from original track - sample offset from recording
+                # You can think of this as a possible offset for the sample track
                 sid, diff = tup
 
                 # If we haven't had any other matches with this offset yet, add it to the map
@@ -148,15 +152,15 @@ class Dejavu(object):
                 # Increment the match count for this offset and song
                 diff_counter[diff][sid] += 1
 
-                # If we haven't had this song yet, add it to the count map
+                # If we haven't matched with this song yet, add it to the count map
                 if sid not in largest_count:
                     largest_count[sid] = 0
                     largest[sid] = 0
 
                 # If we have more matches for this offset than any other offset in the song, update it
                 if diff_counter[diff][sid] > largest_count[sid]:
-                    largest[sid] = diff
-                    largest_count[sid] = diff_counter[diff][sid]
+                    largest[sid] = diff # The offset prediction for this song
+                    largest_count[sid] = diff_counter[diff][sid] # The number of fingerprints we matched on for this offset
 
             # If we didn't match any songs, return none
             if len(largest_count) == 0:
@@ -164,10 +168,10 @@ class Dejavu(object):
 
             songs = []
 
+            # Run through all of the songs that we matched with and add our best guess for the offset to the list of matched songs
             for song_id, count in largest_count.iteritems():
                 # extract idenfication
                 song = self.db.get_song_by_id(song_id)
-
                 songname = song.get(Dejavu.SONG_NAME, None)
 
                 # return match info
@@ -175,7 +179,7 @@ class Dejavu(object):
                                  fingerprint.DEFAULT_WINDOW_SIZE *
                                  fingerprint.DEFAULT_OVERLAP_RATIO, 5)
 
-                # Our confidence is the number of matches we had for the offset with the most matches
+                # Our confidence is the number of fingerprint matches we had for the offset prediciton with the most matches
                 song = {
                     Dejavu.SONG_ID: song_id,
                     Dejavu.SONG_NAME: songname,
