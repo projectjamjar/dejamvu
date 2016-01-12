@@ -27,6 +27,8 @@ class Dejavu(object):
         self.db = db_cls(**config.get("database", {}))
         self.db.setup()
 
+        self.multiple_match = config.get("multiple_match",False)
+
         # if we should limit seconds fingerprinted,
         # None|-1 means use entire track
         self.limit = self.config.get("fingerprint_limit", None)
@@ -122,45 +124,110 @@ class Dejavu(object):
             consensus about which hashes are "true" signal from the audio.
 
             Returns a dictionary with match information.
+
+            If "multiple_match" is set to True in the config, this will return
+            a list of dictionaries with match information.
         """
         # align by diffs
         diff_counter = {}
-        largest = 0
-        largest_count = 0
-        song_id = -1
-        for tup in matches:
-            sid, diff = tup
-            if diff not in diff_counter:
-                diff_counter[diff] = {}
-            if sid not in diff_counter[diff]:
-                diff_counter[diff][sid] = 0
-            diff_counter[diff][sid] += 1
 
-            if diff_counter[diff][sid] > largest_count:
-                largest = diff
-                largest_count = diff_counter[diff][sid]
-                song_id = sid
+        if self.multiple_match:
+            largest = {} # A dictionary of song id's to ???
+            largest_count = {} # A dictionary of song id's to ???
 
-        # extract idenfication
-        song = self.db.get_song_by_id(song_id)
-        if song:
-            # TODO: Clarify what `get_song_by_id` should return.
-            songname = song.get(Dejavu.SONG_NAME, None)
+            # Run through all of the (song id, offset)
+            for tup in matches:
+                # diff = database offset from original track - sample offset from recording
+                # You can think of this as a possible offset for the sample track
+                sid, diff = tup
+
+                # If we haven't had any other matches with this offset yet, add it to the map
+                if diff not in diff_counter:
+                    diff_counter[diff] = {}
+
+                # If we haven't had this offset with this song yet, add the song
+                if sid not in diff_counter[diff]:
+                    diff_counter[diff][sid] = 0
+
+                # Increment the match count for this offset and song
+                diff_counter[diff][sid] += 1
+
+                # If we haven't matched with this song yet, add it to the count map
+                if sid not in largest_count:
+                    largest_count[sid] = 0
+                    largest[sid] = 0
+
+                # If we have more matches for this offset than any other offset in the song, update it
+                if diff_counter[diff][sid] > largest_count[sid]:
+                    largest[sid] = diff # The offset prediction for this song
+                    largest_count[sid] = diff_counter[diff][sid] # The number of fingerprints we matched on for this offset
+
+            # If we didn't match any songs, return none
+            if len(largest_count) == 0:
+                return None
+
+            songs = []
+
+            # Run through all of the songs that we matched with and add our best guess for the offset to the list of matched songs
+            for song_id, count in largest_count.iteritems():
+                # extract idenfication
+                song = self.db.get_song_by_id(song_id)
+                songname = song.get(Dejavu.SONG_NAME, None)
+
+                # return match info
+                nseconds = round(float(largest[song_id]) / fingerprint.DEFAULT_FS *
+                                 fingerprint.DEFAULT_WINDOW_SIZE *
+                                 fingerprint.DEFAULT_OVERLAP_RATIO, 5)
+
+                # Our confidence is the number of fingerprint matches we had for the offset prediciton with the most matches
+                song = {
+                    Dejavu.SONG_ID: song_id,
+                    Dejavu.SONG_NAME: songname,
+                    Dejavu.CONFIDENCE: count,
+                    Dejavu.OFFSET: int(largest[song_id]),
+                    Dejavu.OFFSET_SECS: nseconds
+                }
+
+                songs.append(song)
+
+            return songs
         else:
-            return None
+            largest = 0
+            largest_count = 0
+            song_id = -1
+            for tup in matches:
+                sid, diff = tup
+                if diff not in diff_counter:
+                    diff_counter[diff] = {}
+                if sid not in diff_counter[diff]:
+                    diff_counter[diff][sid] = 0
+                diff_counter[diff][sid] += 1
 
-        # return match info
-        nseconds = round(float(largest) / fingerprint.DEFAULT_FS *
-                         fingerprint.DEFAULT_WINDOW_SIZE *
-                         fingerprint.DEFAULT_OVERLAP_RATIO, 5)
-        song = {
-            Dejavu.SONG_ID : song_id,
-            Dejavu.SONG_NAME : songname,
-            Dejavu.CONFIDENCE : largest_count,
-            Dejavu.OFFSET : int(largest),
-            Dejavu.OFFSET_SECS : nseconds,
-            Database.FIELD_FILE_SHA1 : song.get(Database.FIELD_FILE_SHA1, None),}
-        return song
+                if diff_counter[diff][sid] > largest_count:
+                    largest = diff
+                    largest_count = diff_counter[diff][sid]
+                    song_id = sid
+
+            # extract idenfication
+            song = self.db.get_song_by_id(song_id)
+            if song:
+                # TODO: Clarify what `get_song_by_id` should return.
+                songname = song.get(Dejavu.SONG_NAME, None)
+            else:
+                return None
+
+            # return match info
+            nseconds = round(float(largest) / fingerprint.DEFAULT_FS *
+                             fingerprint.DEFAULT_WINDOW_SIZE *
+                             fingerprint.DEFAULT_OVERLAP_RATIO, 5)
+            song = {
+                Dejavu.SONG_ID : song_id,
+                Dejavu.SONG_NAME : songname,
+                Dejavu.CONFIDENCE : largest_count,
+                Dejavu.OFFSET : int(largest),
+                Dejavu.OFFSET_SECS : nseconds,
+                Database.FIELD_FILE_SHA1 : song.get(Database.FIELD_FILE_SHA1, None),}
+            return song
 
     def recognize(self, recognizer, *options, **kwoptions):
         r = recognizer(self)
