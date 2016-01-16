@@ -37,4 +37,4 @@ class Lilo():
 
     def fingerprint_song(self):
         # Now let's add this song to the DB
-        self.djv.fingerprint_file(self.filename, self.video_id, song_name=self.video_id)
+        self.djv.fingerprint_file(self.filename, self.video_id)
