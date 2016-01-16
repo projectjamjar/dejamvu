@@ -86,6 +86,7 @@ class Dejavu(object):
                 # Print traceback because we can't reraise it here
                 traceback.print_exc(file=sys.stdout)
             else:
+                raise RuntimeError("Not implemented -- use fingerprint_file() instead!") # Drew
                 sid = self.db.insert_song(song_name, file_hash)
 
                 self.db.insert_hashes(sid, hashes)
@@ -95,7 +96,7 @@ class Dejavu(object):
         pool.close()
         pool.join()
 
-    def fingerprint_file(self, filepath, song_name=None):
+    def fingerprint_file(self, filepath, video_id, song_name=None):
         songname = decoder.path_to_songname(filepath)
         song_hash = decoder.unique_hash(filepath)
         song_name = song_name or songname
@@ -108,7 +109,7 @@ class Dejavu(object):
                 self.limit,
                 song_name=song_name
             )
-            sid = self.db.insert_song(song_name, file_hash)
+            sid = self.db.insert_song(song_name, video_id, file_hash)
 
             self.db.insert_hashes(sid, hashes)
             self.db.set_song_fingerprinted(sid)
