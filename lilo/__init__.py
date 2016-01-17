@@ -10,19 +10,17 @@ from dejavu.recognize import FileRecognizer
 from dejavu.database import get_database, Database
 import argparse
 
-import lilo_config as config
-
 class Lilo():
     """
     The class for JamJar which will be used to identify video matches and add fingerprints to the database
     """
 
-    def __init__(self, filename, video_id):
+    def __init__(self, config, filename, video_id):
         """
         usage:
             fingerprinter = Lilo('/path/to/video/file','unique_video_id')
         """
-        self.djv = Dejavu(config.config)
+        self.djv = Dejavu(config)
         self.filename = filename
         self.video_id = video_id
 
