@@ -14,6 +14,7 @@ class Dejavu(object):
     CONFIDENCE = 'confidence'
     MATCH_TIME = 'match_time'
     OFFSET = 'offset'
+    VIDEO_ID = 'video_id'
     OFFSET_SECS = 'offset_seconds'
 
     def __init__(self, config):
@@ -186,7 +187,8 @@ class Dejavu(object):
                     Dejavu.SONG_NAME: songname,
                     Dejavu.CONFIDENCE: count,
                     Dejavu.OFFSET: int(largest[song_id]),
-                    Dejavu.OFFSET_SECS: nseconds
+                    Dejavu.OFFSET_SECS: nseconds,
+                    Dejavu.VIDEO_ID: song.get(video_id, None),
                 }
 
                 songs.append(song)
