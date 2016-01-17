@@ -188,7 +188,7 @@ class Dejavu(object):
                     Dejavu.CONFIDENCE: count,
                     Dejavu.OFFSET: int(largest[song_id]),
                     Dejavu.OFFSET_SECS: nseconds,
-                    Dejavu.VIDEO_ID: song.get(video_id, None),
+                    Dejavu.VIDEO_ID: song.get(Dejavu.VIDEO_ID, None),
                 }
 
                 songs.append(song)
