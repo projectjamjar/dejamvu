@@ -98,14 +98,19 @@ class Dejavu(object):
         pool.join()
 
     def fingerprint_file(self, filepath, video_id, song_name=None):
+        """
+            If file has already been fingerprinted, return None.
+            Else, return information about the file
+        """
         songname = decoder.path_to_songname(filepath)
         song_hash = decoder.unique_hash(filepath)
         song_name = song_name or songname
         # don't refingerprint already fingerprinted files
         if song_hash in self.songhashes_set:
             print "%s already fingerprinted, continuing..." % song_name
+            return None
         else:
-            song_name, hashes, file_hash = _fingerprint_worker(
+            song_name, hashes, file_hash, length_in_seconds = _fingerprint_worker(
                 filepath,
                 self.limit,
                 song_name=song_name
@@ -115,6 +120,10 @@ class Dejavu(object):
             self.db.insert_hashes(sid, hashes)
             self.db.set_song_fingerprinted(sid)
             self.get_fingerprinted_songs()
+
+            return {
+                "song_length" : length_in_seconds
+            }
 
     def find_matches(self, samples, Fs=fingerprint.DEFAULT_FS):
         hashes = fingerprint.fingerprint(samples, Fs=Fs)
@@ -247,7 +256,7 @@ def _fingerprint_worker(filename, limit=None, song_name=None):
 
     songname, extension = os.path.splitext(os.path.basename(filename))
     song_name = song_name or songname
-    channels, Fs, file_hash = decoder.read(filename, limit)
+    channels, Fs, file_hash, length_in_seconds = decoder.read(filename, limit)
     result = set()
     channel_amount = len(channels)
 
@@ -261,7 +270,7 @@ def _fingerprint_worker(filename, limit=None, song_name=None):
                                                  filename))
         result |= set(hashes)
 
-    return song_name, result, file_hash
+    return song_name, result, file_hash, length_in_seconds
 
 
 def chunkify(lst, n):

@@ -73,7 +73,8 @@ def read(filename, limit=None):
         for chn in audiofile:
             channels.append(chn)
 
-    return channels, audiofile.frame_rate, unique_hash(filename)
+    length_in_seconds = len(audiofile) / 1000.0
+    return channels, audiofile.frame_rate, unique_hash(filename), length_in_seconds
 
 
 def path_to_songname(path):
