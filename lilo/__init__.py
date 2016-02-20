@@ -8,6 +8,7 @@ if cmd_folder not in sys.path:
 from dejavu import Dejavu
 from dejavu.recognize import FileRecognizer
 from dejavu.database import get_database, Database
+from dejavu.decoder import unique_hash
 import argparse
 
 class Lilo():
@@ -37,3 +38,8 @@ class Lilo():
         # Now let's add this song to the DB
         data = self.djv.fingerprint_file(self.filename, self.video_id)
         return data
+
+    def check_if_fingerprinted(self):
+        video_hash = unique_hash(self.filename)
+        fingerprinted_video_hashes = self.djv.get_fingerprinted_songs()
+        return video_hash in fingerprinted_video_hashes
