@@ -41,5 +41,6 @@ class Lilo():
 
     def check_if_fingerprinted(self):
         video_hash = unique_hash(self.filename)
+        # Set self.djv.songhashes_set
         fingerprinted_video_hashes = self.djv.get_fingerprinted_songs()
-        return video_hash in fingerprinted_video_hashes
+        return video_hash in self.djv.songhashes_set
