@@ -24,16 +24,18 @@ class Lilo():
         self.filename = filename
         self.video_id = video_id
 
-        # self.recognize_track()
-        # self.fingerprint_song()
+        # cache these after first fingerprint
+        self.hashes = None
 
     def recognize_track(self):
         # Try to match the song to the existing database
-        songs = self.djv.recognize(FileRecognizer, self.filename)
+        hashes, songs = self.djv.recognize(FileRecognizer, self.filename)
+
+        self.hashes = hashes
 
         return songs
 
     def fingerprint_song(self):
         # Now let's add this song to the DB
-        data = self.djv.fingerprint_file(self.filename, self.video_id)
+        data = self.djv.fingerprint_file(self.filename, self.video_id, cached_hashes=self.hashes)
         return data
