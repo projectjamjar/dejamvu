@@ -76,8 +76,10 @@ class Dejavu(object):
 
     def find_matches(self, samples, Fs=fingerprint.DEFAULT_FS):
         hashes = fingerprint.fingerprint(samples, Fs=Fs)
-        matches = self.db.return_matches(hashes)
-        return hashes, matches
+        hashes_list = list(hashes)
+        matches = self.db.return_matches(hashes_list)
+
+        return hashes_list, matches
 
     def align_matches(self, matches):
         """
@@ -211,19 +213,19 @@ def _fingerprint_worker(filename, limit=None, song_name=None, cached_hashes=None
     result = set()
     channel_amount = len(channels)
 
-    for channeln, channel in enumerate(channels):
-        # TODO: Remove prints or change them into optional logging.
-        print("Fingerprinting channel %d/%d for %s" % (channeln + 1,
-                                                       channel_amount,
-                                                       filename))
-        if cached_hashes is None:
+    if cached_hashes is None:
+        for channeln, channel in enumerate(channels):
+            # TODO: Remove prints or change them into optional logging.
+            print("Fingerprinting channel %d/%d for %s" % (channeln + 1,
+                                                           channel_amount,
+                                                           filename))
             hashes = fingerprint.fingerprint(channel, Fs=Fs)
-        else:
-            hashes = cached_hashes
 
-        print("Finished channel %d/%d for %s" % (channeln + 1, channel_amount,
-                                                 filename))
-        result |= set(hashes)
+            print("Finished channel %d/%d for %s" % (channeln + 1, channel_amount,
+                                                     filename))
+            result |= set(hashes)
+    else:
+        result = set(cached_hashes)
 
     return song_name, result, file_hash, length_in_seconds
 
