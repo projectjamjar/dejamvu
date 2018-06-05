@@ -72,7 +72,7 @@ class SQLDatabase(Database):
     CREATE_SONGS_TABLE = """
         CREATE TABLE IF NOT EXISTS `%s` (
             `%s` mediumint unsigned not null auto_increment,
-            `%s` varchar(32) not null,
+            `%s` varchar(128) not null,
             `%s` varchar(250) not null,
             `%s` tinyint default 0,
             `%s` binary(20) not null,

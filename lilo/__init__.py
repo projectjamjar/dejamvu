@@ -19,7 +19,7 @@ class Lilo():
     def __init__(self, config, filename, video_id):
         """
         usage:
-            fingerprinter = Lilo('/path/to/video/file','unique_video_id')
+            fingerprinter = Lilo(config, '/path/to/video/file','unique_video_id')
         """
         self.djv = Dejavu(config)
         self.filename = filename

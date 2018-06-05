@@ -1,9 +1,9 @@
 # Our DB settings
 config = {
     "database": {
-        "host": "127.0.0.1",
+        "host": "docker.localhost",
         "user": "root",
-        "passwd": "password",
+        "passwd": "root",
         "db": "dejavu"
     },
     "multiple_match": True
