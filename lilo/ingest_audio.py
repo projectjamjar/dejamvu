@@ -27,9 +27,10 @@ def main():
     for index, filename in enumerate(files):
         full_path = os.path.join(dir, filename)
 
+        print "Indexing file {}/{} - {}".format(index, len(files), filename)
+
         # For now we'll assume all the files are valid audio or video
         if (os.path.isfile(full_path)):
-
             lilo = Lilo(lilo_config.config, full_path, filename)
 
             print "Adding {0} to database...".format(filename)
@@ -38,8 +39,6 @@ def main():
             lilo.fingerprint_song()
 
             print "Fingerprinting of {0} complete.".format(filename)
-
-    pprint.pprint(alignment_data)
 
 
 if __name__ == '__main__':
