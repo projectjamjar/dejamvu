@@ -1,5 +1,5 @@
-PYTHON=python2
-PIP=pip2
+PYTHON=python3
+PIP=pip3
 SRC_DIR=lilo
 
 default: run

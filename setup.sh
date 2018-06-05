@@ -16,15 +16,14 @@ APT_CMD=$(which apt-get)
 if [[ ! -z $BREW_CMD ]]; then
     # What to install with `brew`
     echo "Installing brew dependencies...";
-    brew install python2
+    brew install python3
 
     echo "Installing other dependencies...";
     brew install libav
 
 elif [[ ! -z $APT_CMD ]]; then
     # What to install with `apt-get`
-    echo "Installing python3...";
-
+    echo "Installing apt-get dependencies...";
     sudo apt-get install -y python python-pip
 
     echo "Installing other dependencies...";
@@ -65,7 +64,7 @@ VENV=.venv
 # Create the actual virtualenv
 if [ ! -d $VENV ]; then
     echo "Creating virtual env..."
-    virtualenv -p python2 $VENV
+    virtualenv -p python3 $VENV
 fi
 
 # If we have a requirements file, install them reqs
