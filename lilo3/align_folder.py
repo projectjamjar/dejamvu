@@ -1,11 +1,11 @@
 __author__ = 'Mark'
-from .dejavu import Dejavu
-from .dejavu.recognize import FileRecognizer
 import argparse
 import os
 import pprint
 
-from lilo import Lilo, lilo_config
+from lilo import Lilo
+from lilo3 import lilo_config
+
 
 def main():
     # Set up our commang line arguments

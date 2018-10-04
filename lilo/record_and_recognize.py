@@ -1,11 +1,9 @@
 __author__ = 'Mark'
 from dejavu import Dejavu
-from dejavu.recognize import FileRecognizer, MicrophoneRecognizer
+from dejavu.recognize import MicrophoneRecognizer
 import argparse
-import os
-import pprint
 
-from lilo import Lilo, lilo_config
+from lilo3 import lilo_config
 
 
 def main():
